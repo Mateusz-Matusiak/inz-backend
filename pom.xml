@@ -90,6 +90,7 @@
                 </configuration>
             </plugin>
         </plugins>
+        <finalName>animal-shelter</finalName>
     </build>
 
 </project>
