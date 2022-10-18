@@ -2,10 +2,12 @@ package com.example.backend.user;
 
 import com.example.backend.user.role.RoleEntity;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class UserEntity {
@@ -26,4 +28,14 @@ public class UserEntity {
 //    private List<AdoptionSurveyEntity> adoptionSurveys;
 //    @OneToMany(mappedBy = "walks")
 //    private List<WalkEntity> walks;
+
+
+    public UserEntity(String firstName, String lastName, String email, String password, String phoneNumber, RoleEntity role) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+    }
 }
