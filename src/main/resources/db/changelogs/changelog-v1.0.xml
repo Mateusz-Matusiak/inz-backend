@@ -148,5 +148,29 @@
                                  referencedColumnNames="id"/>
 
     </changeSet>
+
+    <changeSet id="insert_test_data_locally" author="mmatusiak">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT (SELECT COUNT(*) FROM users WHERE email = 'test@mail.com') +
+                       (SELECT COUNT(*) FROM animals WHERE name = 'minnie') +
+                       (SELECT COUNT(*) FROM roles WHERE name = 'USER')
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="roles">
+            <column name="id" value="1"/>
+            <column name="name" value="USER"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="1"/>
+            <column name="email" value="mateusz.matusiak01@gmail.com"/>
+            <column name="first_name" value="Mateusz"/>
+            <column name="last_name" value="Matusiak"/>
+            <column name="phone_number" value="794123456"/>
+            <column name="role_id" value="1"/>
+            <!--hasło password-->
+            <column name="password" value="$2a$12$QiLwXwmACrVLaN3L4DQ5peeu55AVmcF4MPewrPjUNMqQGo4EVee7W"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
 
