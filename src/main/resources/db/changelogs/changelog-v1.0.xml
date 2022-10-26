@@ -177,7 +177,7 @@
             <column name="color" value="ginger"/>
             <column name="character" value="calm and friendly"/>
             <column name="description" value="Fantastic dog, loves to play with ball and her fox."/>
-            <column name="sex" value="female"/>
+            <column name="sex" value="FEMALE"/>
             <column name="size" value="30"/>
         </insert>
         <insert tableName="animals">

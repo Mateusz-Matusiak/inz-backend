@@ -1,5 +1,6 @@
 package com.example.backend.animal;
 
+import com.example.backend.animal.dto.AnimalDetailsOutput;
 import com.example.backend.animal.dto.AnimalOutput;
 import com.example.backend.animal.dto.NewAnimalDTO;
 import com.example.backend.animal.dto.NewAnimalTypeDTO;
@@ -8,10 +9,7 @@ import com.example.backend.animal.type.AnimalTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
@@ -48,5 +46,12 @@ public class AnimalController {
         return animalTypeService.addNewAnimalType(newAnimalType)
                 .map(animalType -> ResponseEntity.created(URI.create(String.format("/animal/types/%d", animalType.getId()))).body(animalType))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT));
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<AnimalDetailsOutput> getAnimalDetails(@PathVariable Long id) {
+        return animalService.getAnimalDetailsById(id)
+                .map(animalDetailsOutput -> ResponseEntity.ok(animalDetailsOutput))
+                .orElse(ResponseEntity.internalServerError().build());
     }
 }

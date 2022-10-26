@@ -2,6 +2,7 @@ package com.example.backend.animal;
 
 import com.example.backend.animal.details.AnimalDetailsEntity;
 import com.example.backend.animal.details.AnimalDetailsRepository;
+import com.example.backend.animal.dto.AnimalDetailsOutput;
 import com.example.backend.animal.dto.AnimalOutput;
 import com.example.backend.animal.dto.NewAnimalDTO;
 import com.example.backend.animal.type.AnimalTypeRepository;
@@ -48,5 +49,17 @@ public class AnimalService {
                                 animalEntity.getAnimalDetailsEntity().getSex(),
                                 animalEntity.getAnimalDetailsEntity().getSize()))
                 .toList();
+    }
+
+    public Optional<AnimalDetailsOutput> getAnimalDetailsById(Long id) {
+        return animalRepository.findById(id).map(
+                animal ->
+                        new AnimalDetailsOutput(
+                                animal.getId(), animal.getName(), animal.getAge(),
+                                animal.getShelterDate(), animal.getAnimalTypeEntity().getTypeName(),
+                                animal.getOwner() == null ? null : animal.getOwner().getEmail(), animal.getAnimalDetailsEntity().getColor(),
+                                animal.getAnimalDetailsEntity().getCharacter(), animal.getAnimalDetailsEntity().getDescription(),
+                                animal.getAnimalDetailsEntity().getSex(), animal.getAnimalDetailsEntity().getSize())
+        );
     }
 }
