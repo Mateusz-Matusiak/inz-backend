@@ -13,12 +13,22 @@ public class AdoptionSurveyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @ManyToOne(targetEntity = UserEntity.class)
+    @JoinColumn(name = "user_id")
     private UserEntity user;
-    @ManyToOne
-    @JoinColumn(name = "animal_id", referencedColumnName = "id")
+    @ManyToOne(targetEntity = AnimalEntity.class)
+    @JoinColumn(name = "animal_id")
     private AnimalEntity animal;
     private boolean isAccepted;
     private int numberOfWalks;
+
+    public AdoptionSurveyEntity(UserEntity user, AnimalEntity animal) {
+        this.user = user;
+        this.animal = animal;
+        this.isAccepted = false;
+    }
+
+    public AdoptionSurveyEntity() {
+
+    }
 }

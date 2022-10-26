@@ -55,7 +55,7 @@
     <changeSet id="setup_user_tables" author="mmatusiak">
 
         <createTable tableName="roles">
-            <column name="id" type="int">
+            <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="name" type="VARCHAR(255)">
@@ -63,7 +63,7 @@
             </column>
         </createTable>
         <createTable tableName="users">
-            <column type="BIGINT" name="id">
+            <column type="BIGINT" name="id" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column type="VARCHAR(255)" name="email">
@@ -85,7 +85,7 @@
         </createTable>
 
         <createTable tableName="donations">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column name="amount" type="int">
@@ -100,7 +100,7 @@
     </changeSet>
     <changeSet id="connect_animals_with_user" author="mmatusiak">
         <createTable tableName="adoption_surveys">
-            <column type="BIGINT" name="id">
+            <column type="BIGINT" name="id" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column type="BIGINT" name="user_id">
@@ -113,7 +113,7 @@
             <column type="boolean" name="is_accepted"/>
         </createTable>
         <createTable tableName="walks">
-            <column name="id" type="BIGINT">
+            <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
             <column type="BIGINT" name="user_id"/>
@@ -147,6 +147,47 @@
                                  constraintName="fk_donations_user_id" referencedTableName="users"
                                  referencedColumnNames="id"/>
 
+    </changeSet>
+
+    <changeSet id="insert_test_data_locally" author="mmatusiak">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT (SELECT COUNT(*) FROM users WHERE email = 'test@mail.com') +
+                       (SELECT COUNT(*) FROM animals WHERE name = 'minnie') +
+                       (SELECT COUNT(*) FROM roles WHERE name = 'USER')
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="roles">
+            <column name="name" value="USER"/>
+        </insert>
+        <insert tableName="users">
+            <column name="email" value="mateusz.matusiak01@gmail.com"/>
+            <column name="first_name" value="Mateusz"/>
+            <column name="last_name" value="Matusiak"/>
+            <column name="phone_number" value="794123456"/>
+            <column name="role_id" value="1"/>
+            <!--hasło password-->
+            <column name="password" value="$2a$12$QiLwXwmACrVLaN3L4DQ5peeu55AVmcF4MPewrPjUNMqQGo4EVee7W"/>
+        </insert>
+
+        <insert tableName="animal_types">
+            <column name="type_name" value="dog"/>
+        </insert>
+        <insert tableName="animal_details">
+            <column name="color" value="ginger"/>
+            <column name="character" value="calm and friendly"/>
+            <column name="description" value="Fantastic dog, loves to play with ball and her fox."/>
+            <column name="sex" value="female"/>
+            <column name="size" value="30"/>
+        </insert>
+        <insert tableName="animals">
+            <column name="name" value="Minnie"/>
+            <column name="age" value="2"/>
+            <column name="shelter_date" value="2004-02-12"/>
+            <column name="image_path" value="/minnie"/>
+            <column name="animal_type_id" value="1"/>
+            <column name="animal_detail_id" value="1"/>
+        </insert>
     </changeSet>
 </databaseChangeLog>
 
