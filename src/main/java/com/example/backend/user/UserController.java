@@ -1,6 +1,7 @@
 package com.example.backend.user;
 
 import com.example.backend.user.dto.RegisterUserDTO;
+import com.example.backend.user.dto.UpdateUserDTO;
 import com.example.backend.user.dto.UserOutput;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,5 +31,13 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserOutput>> fetchAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserOutput> updateUser(@RequestBody UpdateUserDTO userDetails,
+                                                 @PathVariable Long id) {
+        return userService.partialUpdate(id, userDetails)
+                .map(userOutput -> ResponseEntity.ok(userOutput))
+                .orElse(ResponseEntity.internalServerError().build());
     }
 }
