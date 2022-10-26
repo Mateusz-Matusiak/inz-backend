@@ -4,12 +4,15 @@ import com.example.backend.animal.dto.AnimalDetailsOutput;
 import com.example.backend.animal.dto.AnimalOutput;
 import com.example.backend.animal.dto.NewAnimalDTO;
 import com.example.backend.animal.dto.NewAnimalTypeDTO;
+import com.example.backend.animal.images.ImageEntity;
+import com.example.backend.animal.images.ImageService;
 import com.example.backend.animal.type.AnimalTypeEntity;
 import com.example.backend.animal.type.AnimalTypeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URI;
@@ -21,6 +24,7 @@ import java.util.List;
 public class AnimalController {
     private final AnimalService animalService;
     private final AnimalTypeService animalTypeService;
+    private final ImageService imageService;
 
     @PostMapping
     public ResponseEntity<AnimalOutput> addAnimal(NewAnimalDTO newAnimal) {
@@ -53,5 +57,14 @@ public class AnimalController {
         return animalService.getAnimalDetailsById(id)
                 .map(animalDetailsOutput -> ResponseEntity.ok(animalDetailsOutput))
                 .orElse(ResponseEntity.internalServerError().build());
+    }
+
+    @PostMapping("/{id}/images")
+    public ResponseEntity<ImageEntity> insertAnimalImage(@RequestParam("image") MultipartFile file,
+                                                         @PathVariable Long id) {
+        return imageService.uploadImageForAnimal(file, id)
+                .map(imageEntity -> ResponseEntity.ok(imageEntity))
+                .orElse(ResponseEntity.internalServerError().build());
+
     }
 }

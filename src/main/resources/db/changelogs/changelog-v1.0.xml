@@ -195,13 +195,16 @@
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="path" type="VARCHAR(255)">
+            <column name="file_path" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
             <column name="animal_id" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
             <column name="main" type="boolean" defaultOnNull="false"/>
+            <column name="type" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <addForeignKeyConstraint baseTableName="images" baseColumnNames="animal_id" constraintName="fk_images_animal_id"
                                  referencedTableName="animals" referencedColumnNames="id"/>
