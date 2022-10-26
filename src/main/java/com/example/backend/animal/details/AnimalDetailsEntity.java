@@ -17,10 +17,11 @@ public class AnimalDetailsEntity {
     private String color;
     private String character;
     private String description;
-    private String sex;
+    @Enumerated(EnumType.STRING)
+    private AnimalSex sex;
     private Integer size;
 
-    public AnimalDetailsEntity(String color, String character, String description, String sex, Integer size) {
+    public AnimalDetailsEntity(String color, String character, String description, AnimalSex sex, Integer size) {
         this.color = color;
         this.character = character;
         this.description = description;

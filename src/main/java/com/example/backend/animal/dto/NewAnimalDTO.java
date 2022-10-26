@@ -1,6 +1,8 @@
 package com.example.backend.animal.dto;
 
 
+import com.example.backend.animal.details.AnimalSex;
+
 public record NewAnimalDTO(
         String name,
         Integer age,
@@ -9,7 +11,7 @@ public record NewAnimalDTO(
         String colour,
         String character,
         String description,
-        String sex,
+        AnimalSex sex,
         Integer size
 ) {
 }

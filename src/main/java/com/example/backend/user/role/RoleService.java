@@ -1,6 +1,6 @@
 package com.example.backend.user.role;
 
-import com.example.backend.exception.AlreadyExistsException;
+import com.example.backend.exception.ResourceAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class RoleService {
         if (roleRepository.findByName(name).isPresent()) {
             String message = String.format("Role %s already exists in database", name);
             log.warn(message);
-            throw new AlreadyExistsException(message);
+            throw new ResourceAlreadyExistsException(message);
         } else {
             return Optional.of(roleRepository.save(new RoleEntity(name)));
         }

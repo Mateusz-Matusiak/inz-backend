@@ -1,5 +1,7 @@
 package com.example.backend.animal.dto;
 
+import com.example.backend.animal.details.AnimalSex;
+
 import java.time.LocalDate;
 
 public record AnimalOutput(
@@ -9,7 +11,7 @@ public record AnimalOutput(
         LocalDate catchDate,
         //imag
         String type,
-        String sex,
+        AnimalSex sex,
         Integer size
 ) {
 }

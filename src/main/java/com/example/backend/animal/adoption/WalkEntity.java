@@ -23,4 +23,13 @@ public class WalkEntity {
     private AnimalEntity animal;
     private LocalDateTime date;
 
+    public WalkEntity(UserEntity user, AnimalEntity animal, LocalDateTime date) {
+        this.user = user;
+        this.animal = animal;
+        this.date = date;
+    }
+
+    public WalkEntity() {
+
+    }
 }
