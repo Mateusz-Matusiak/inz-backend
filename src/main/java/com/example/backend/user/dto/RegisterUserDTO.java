@@ -1,5 +1,8 @@
 package com.example.backend.user.dto;
 
-public record RegisterUserDTO(String email,
-                              String password) {
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Size;
+
+public record RegisterUserDTO(@Email String email,
+                              @Size(min = 7) String password) {
 }
