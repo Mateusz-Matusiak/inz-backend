@@ -9,7 +9,7 @@ public record AnimalOutput(
         String name,
         Integer age,
         LocalDate catchDate,
-        //imag
+        String imagePath,
         String type,
         AnimalSex sex,
         Integer size

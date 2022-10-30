@@ -4,18 +4,28 @@ import com.example.backend.animal.dto.AnimalDetailsOutput;
 import com.example.backend.animal.dto.AnimalOutput;
 import com.example.backend.animal.dto.NewAnimalDTO;
 import com.example.backend.animal.dto.NewAnimalTypeDTO;
-import com.example.backend.animal.images.ImageEntity;
 import com.example.backend.animal.images.ImageService;
+import com.example.backend.animal.images.SavedImageDTO;
 import com.example.backend.animal.type.AnimalTypeEntity;
 import com.example.backend.animal.type.AnimalTypeService;
+import com.example.backend.exception.ResourceNotExistsException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.ServletContext;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -25,6 +35,7 @@ public class AnimalController {
     private final AnimalService animalService;
     private final AnimalTypeService animalTypeService;
     private final ImageService imageService;
+    private final ServletContext servletContext;
 
     @PostMapping
     public ResponseEntity<AnimalOutput> addAnimal(NewAnimalDTO newAnimal) {
@@ -60,11 +71,37 @@ public class AnimalController {
     }
 
     @PostMapping("/{id}/images")
-    public ResponseEntity<ImageEntity> insertAnimalImage(@RequestParam("image") MultipartFile file,
-                                                         @PathVariable Long id) {
-        return imageService.uploadImageForAnimal(file, id)
-                .map(imageEntity -> ResponseEntity.ok(imageEntity))
-                .orElse(ResponseEntity.internalServerError().build());
+    public ResponseEntity<List<SavedImageDTO>> insertAnimalImage(@RequestParam("image") MultipartFile[] files,
+                                                                 @PathVariable Long id) {
 
+        List<SavedImageDTO> savedImages = Arrays.stream(files).map(file ->
+                imageService.uploadImageForAnimal(file, id).map(imageEntity ->
+                        new SavedImageDTO(imageEntity.getId(), imageEntity.getFilePath(),
+                                imageEntity.isMain(), imageEntity.getType(),
+                                imageEntity.getAnimal().getId())
+                ).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST))).toList();
+
+        return ResponseEntity.ok(savedImages);
+    }
+
+    @GetMapping("/{id}/images")
+    public ResponseEntity<List<SavedImageDTO>> getImagesForAnimal(@PathVariable Long id) {
+        return ResponseEntity.ok(imageService.getAllImagesForAnimal(id));
+    }
+
+    @GetMapping("/{id}/images/main")
+    public ResponseEntity<byte[]> getMainImage(@PathVariable Long id) throws IOException {
+        final HttpHeaders headers = new HttpHeaders();
+        InputStream in = imageService.getMainImageForAnimal(id).map(savedImage -> {
+            headers.setContentType(MediaType.IMAGE_JPEG);
+            try {
+                return new FileInputStream(savedImage.path());
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }).orElseThrow(
+                () -> new ResourceNotExistsException(String.format("This animal [%d] doesn't have image", id))
+        );
+        return new ResponseEntity<>(IOUtils.toByteArray(in), headers, HttpStatus.CREATED);
     }
 }

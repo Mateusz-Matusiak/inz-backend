@@ -8,15 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,16 +25,7 @@ public class ImageService {
     private static final String FOLDER_PATH = "/images";
     private final ImageRepository imageRepository;
     private final AnimalRepository animalRepository;
-    private final Path rootLocation = Paths.get(FOLDER_PATH);
 
-    @PostConstruct
-    public void init() {
-        try {
-            Files.createDirectories(rootLocation);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public Optional<ImageEntity> uploadImageForAnimal(MultipartFile file, Long animalId) {
         Optional<AnimalEntity> animalOptional = animalRepository.findById(animalId);
@@ -45,19 +35,15 @@ public class ImageService {
         if (animalOptional.isPresent()) {
             AnimalEntity animal = animalOptional.get();
             String directoryPath = String.format("%s/%d", FOLDER_PATH, animal.getId());
-            String filePath = String.format("%s/%s", directoryPath, file.getOriginalFilename());
             try {
-                Path destinationDirectory = Files.createDirectories(Path.of(directoryPath));
-                Path destinationFile = destinationDirectory.resolve(Paths.get(file.getOriginalFilename()))
+                Path destinationFile = Files.createDirectories(Path.of(directoryPath))
+                        .resolve(Paths.get(file.getOriginalFilename()))
                         .normalize().toAbsolutePath();
-                if (!destinationFile.getParent().equals(destinationDirectory)) {
-                    log.warn("Cannot store file outside current directory");
-                    //todo throw
-                }
-                try (InputStream inputStream = file.getInputStream()) {
-                    Files.copy(inputStream, destinationFile, REPLACE_EXISTING);
-                }
-                return Optional.of(imageRepository.save(new ImageEntity(filePath, animal, file.getContentType())));
+                String savedFilename = saveImageInFileSystem(file, destinationFile);
+
+                return imageRepository.countAllByAnimal(animal) <= 0
+                        ? Optional.of(imageRepository.save(new ImageEntity(savedFilename, animal, true, file.getContentType())))
+                        : Optional.of(imageRepository.save(new ImageEntity(savedFilename, animal, file.getContentType())));
             } catch (IOException e) {
                 log.error("Could not save new file ", e);
             }
@@ -65,6 +51,39 @@ public class ImageService {
             throw new ResourceNotExistsException(String.format("Animal with id %d does not exist", animalId));
         }
         return Optional.empty();
+    }
+
+    private String saveImageInFileSystem(MultipartFile file, Path destination) throws IOException {
+        while (Files.exists(destination)) {
+            String[] filename = file.getOriginalFilename().split("\\.(?=[^\\.]+$)");
+            String randomFilename = filename[0] + UUID.randomUUID();
+            String extension = "." + filename[1];
+            destination = destination.getParent().resolve(randomFilename + extension);
+        }
+
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(file.getInputStream())) {
+            Files.copy(bufferedInputStream, destination);
+        } catch (IOException e) {
+            log.warn(e.getMessage());
+            throw e;
+        }
+        return destination.toAbsolutePath().toString();
+    }
+
+    public List<SavedImageDTO> getAllImagesForAnimal(Long id) {
+        return animalRepository.findById(id).map(imageRepository::findAllByAnimal)
+                .orElseThrow(() -> new ResourceNotExistsException(String.format("Animal with %d id does not exist", id)))
+                .stream()
+                .map(image -> new SavedImageDTO(image.getId(), image.getFilePath(), image.isMain(), image.getType(), id))
+                .toList();
+    }
+
+    public Optional<SavedImageDTO> getMainImageForAnimal(Long id) {
+        return animalRepository.findById(id).map(imageRepository::findByAnimalAndMainIsTrue)
+                .orElseThrow(() -> new ResourceNotExistsException("Animal with given id does not exist"))
+                .map(image -> new SavedImageDTO(image.getId(), image.getFilePath(),
+                        image.isMain(), image.getType(),
+                        image.getAnimal().getId()));
     }
 
 }

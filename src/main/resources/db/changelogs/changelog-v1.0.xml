@@ -196,7 +196,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="file_path" type="VARCHAR(255)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="animal_id" type="BIGINT">
                 <constraints nullable="false"/>
