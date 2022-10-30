@@ -92,8 +92,10 @@ public class AnimalController {
     @GetMapping("/{id}/images/main")
     public ResponseEntity<byte[]> getMainImage(@PathVariable Long id) throws IOException {
         final HttpHeaders headers = new HttpHeaders();
-        InputStream in = imageService.getMainImageForAnimal(id).map(savedImage -> {
-            headers.setContentType(MediaType.IMAGE_JPEG);
+        InputStream is = imageService.getMainImageForAnimal(id).map(savedImage -> {
+            headers.setContentType(savedImage.type().equals("image/jpeg")
+                    ? MediaType.IMAGE_JPEG
+                    : (savedImage.type().equals("image/png") ? MediaType.IMAGE_PNG : MediaType.ALL));
             try {
                 return new FileInputStream(savedImage.path());
             } catch (FileNotFoundException e) {
@@ -102,6 +104,25 @@ public class AnimalController {
         }).orElseThrow(
                 () -> new ResourceNotExistsException(String.format("This animal [%d] doesn't have image", id))
         );
-        return new ResponseEntity<>(IOUtils.toByteArray(in), headers, HttpStatus.CREATED);
+        return new ResponseEntity<>(IOUtils.toByteArray(is), headers, HttpStatus.CREATED);
     }
+
+    @GetMapping("/{id}/images/{imageId}")
+    public ResponseEntity<byte[]> getImageById(@PathVariable Long id, @PathVariable Long imageId) throws IOException {
+        final HttpHeaders headers = new HttpHeaders();
+        InputStream is = imageService.getImageByPath(id, imageId)
+                .map(image -> {
+                    headers.setContentType(image.type().equals("image/jpeg")
+                            ? MediaType.IMAGE_JPEG
+                            : (image.type().equals("image/png") ? MediaType.IMAGE_PNG : MediaType.ALL));
+                    try {
+                        return new FileInputStream(image.path());
+                    } catch (FileNotFoundException e) {
+                        throw new ResponseStatusException(HttpStatus.I_AM_A_TEAPOT, e.getMessage());
+                    }
+                }).orElseThrow(() -> new ResourceNotExistsException(String.format("This animal [%d] doesn't have image", id)));
+        return new ResponseEntity<>(IOUtils.toByteArray(is), headers, HttpStatus.CREATED);
+    }
+
+
 }

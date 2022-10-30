@@ -26,7 +26,6 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final AnimalRepository animalRepository;
 
-
     public Optional<ImageEntity> uploadImageForAnimal(MultipartFile file, Long animalId) {
         Optional<AnimalEntity> animalOptional = animalRepository.findById(animalId);
         if (file.isEmpty()) {
@@ -86,4 +85,16 @@ public class ImageService {
                         image.getAnimal().getId()));
     }
 
+    public Optional<SavedImageDTO> getImageByPath(Long id, Long imageId) {
+        return imageRepository.findById(imageId)
+                .map(image -> {
+                    if (image.getAnimal().getId() != id) {
+                        log.warn("This image {} is not assigned to given animal {}", image.getAnimal().getId(), id);
+                        throw new ResourceNotExistsException("This image does not exist for given animal");
+                    }
+                    return new SavedImageDTO(image.getId(),
+                            image.getFilePath(), image.isMain(), image.getType(),
+                            image.getAnimal().getId());
+                });
+    }
 }
