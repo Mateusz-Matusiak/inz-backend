@@ -177,7 +177,7 @@
             <column name="color" value="ginger"/>
             <column name="character" value="calm and friendly"/>
             <column name="description" value="Fantastic dog, loves to play with ball and her fox."/>
-            <column name="sex" value="female"/>
+            <column name="sex" value="FEMALE"/>
             <column name="size" value="30"/>
         </insert>
         <insert tableName="animals">
@@ -188,6 +188,26 @@
             <column name="animal_type_id" value="1"/>
             <column name="animal_detail_id" value="1"/>
         </insert>
+    </changeSet>
+
+    <changeSet id="add_images_table" author="mmatusiak">
+        <createTable tableName="images">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="file_path" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="animal_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="main" type="boolean" defaultOnNull="false"/>
+            <column name="type" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="images" baseColumnNames="animal_id" constraintName="fk_images_animal_id"
+                                 referencedTableName="animals" referencedColumnNames="id"/>
     </changeSet>
 </databaseChangeLog>
 

@@ -3,6 +3,7 @@ package com.example.backend.animal;
 import com.example.backend.animal.adoption.AdoptionSurveyEntity;
 import com.example.backend.animal.details.AnimalDetailsEntity;
 import com.example.backend.animal.type.AnimalTypeEntity;
+import com.example.backend.user.UserEntity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -32,6 +33,9 @@ public class AnimalEntity {
     private AnimalDetailsEntity animalDetailsEntity;
     @OneToMany(mappedBy = "animal")
     private List<AdoptionSurveyEntity> adoptionSurveys;
+    @ManyToOne(targetEntity = UserEntity.class)
+    @JoinColumn(name = "owner_id")
+    private UserEntity owner;
 
     public AnimalEntity(String name, Integer age, LocalDate shelterDate, String imagePath, AnimalTypeEntity animalTypeEntity) {
         this.name = name;
