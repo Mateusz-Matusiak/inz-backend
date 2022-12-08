@@ -2,6 +2,8 @@ package com.example.backend.user;
 
 import com.example.backend.exception.ResourceAlreadyExistsException;
 import com.example.backend.exception.ResourceNotExistsException;
+import com.example.backend.user.address.AddressEntity;
+import com.example.backend.user.address.AddressRepository;
 import com.example.backend.user.dto.RegisterUserDTO;
 import com.example.backend.user.dto.UpdateUserDTO;
 import com.example.backend.user.dto.UserMapper;
@@ -22,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
+    private final AddressRepository addressRepository;
 
     public Optional<UserOutput> addUser(RegisterUserDTO newUser) {
         return Optional.ofNullable(roleRepository.findByName("USER")
@@ -56,6 +59,14 @@ public class UserService {
                     user.setFirstName(checkAndUpdateField(user.getFirstName(), userDetails.firstName()));
                     user.setLastName(checkAndUpdateField(user.getLastName(), userDetails.lastName()));
                     user.setPhoneNumber(checkAndUpdateField(user.getPhoneNumber(), userDetails.phoneNumber()));
+                    AddressEntity userAddress = user.getAddress();
+                    userAddress.setCity(userDetails.city());
+                    userAddress.setStreet(userDetails.streetName() + " " + userDetails.streetNumber());
+                    userAddress.setPostalCode(userDetails.postalCode());
+                    userAddress.setCountry(userDetails.country());
+                    addressRepository.deleteById(userAddress.getId());
+                    AddressEntity saved = addressRepository.save(userAddress);
+                    user.setAddress(saved);
                     if (userDetails.role() != null) {
                         roleRepository.findByName(userDetails.role())
                                 .ifPresentOrElse(

@@ -37,7 +37,7 @@ public class UserController {
     public ResponseEntity<UserOutput> updateUser(@RequestBody UpdateUserDTO userDetails,
                                                  @PathVariable Long id) {
         return userService.partialUpdate(id, userDetails)
-                .map(userOutput -> ResponseEntity.ok(userOutput))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.internalServerError().build());
     }
 }
