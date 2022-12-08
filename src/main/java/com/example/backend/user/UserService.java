@@ -11,6 +11,9 @@ import com.example.backend.user.dto.UserOutput;
 import com.example.backend.user.role.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -20,7 +23,7 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
@@ -59,12 +62,17 @@ public class UserService {
                     user.setFirstName(checkAndUpdateField(user.getFirstName(), userDetails.firstName()));
                     user.setLastName(checkAndUpdateField(user.getLastName(), userDetails.lastName()));
                     user.setPhoneNumber(checkAndUpdateField(user.getPhoneNumber(), userDetails.phoneNumber()));
-                    AddressEntity userAddress = user.getAddress();
+                    AddressEntity userAddress;
+                    if (user.getAddress() != null) {
+                        userAddress = user.getAddress();
+                        addressRepository.deleteById(userAddress.getId());
+                    } else {
+                        userAddress = new AddressEntity();
+                    }
                     userAddress.setCity(userDetails.city());
                     userAddress.setStreet(userDetails.streetName() + " " + userDetails.streetNumber());
                     userAddress.setPostalCode(userDetails.postalCode());
                     userAddress.setCountry(userDetails.country());
-                    addressRepository.deleteById(userAddress.getId());
                     AddressEntity saved = addressRepository.save(userAddress);
                     user.setAddress(saved);
                     if (userDetails.role() != null) {
@@ -89,4 +97,13 @@ public class UserService {
         return oldField;
     }
 
+    public Optional<UserEntity> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<UserEntity> user = userRepository.findByEmail(username);
+        return user.get();
+    }
 }
