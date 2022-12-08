@@ -10,7 +10,7 @@ public record AnimalDetailsOutput(
         String name,
         Integer age,
         LocalDate catchDate,
-        Set<String> imagesPaths,
+        Set<Long> imagesIds,
 
         String type,
         String ownerEmail,

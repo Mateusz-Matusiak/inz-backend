@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.ServletContext;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,10 +34,9 @@ public class AnimalController {
     private final AnimalService animalService;
     private final AnimalTypeService animalTypeService;
     private final ImageService imageService;
-    private final ServletContext servletContext;
 
     @PostMapping
-    public ResponseEntity<AnimalOutput> addAnimal(NewAnimalDTO newAnimal) {
+    public ResponseEntity<AnimalOutput> addAnimal(@RequestBody NewAnimalDTO newAnimal) {
         return animalService.addAnimal(newAnimal)
                 .map(
                         animal -> ResponseEntity.created(
@@ -66,7 +64,7 @@ public class AnimalController {
     @GetMapping("/{id}/details")
     public ResponseEntity<AnimalDetailsOutput> getAnimalDetails(@PathVariable Long id) {
         return animalService.getAnimalDetailsById(id)
-                .map(animalDetailsOutput -> ResponseEntity.ok(animalDetailsOutput))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.internalServerError().build());
     }
 

@@ -6,7 +6,6 @@ import com.example.backend.animal.details.AnimalSex;
 public record NewAnimalDTO(
         String name,
         Integer age,
-        //images
         String animalType,
         String colour,
         String character,

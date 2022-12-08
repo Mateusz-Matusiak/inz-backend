@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class ImageService {
 
     public Optional<ImageEntity> uploadImageForAnimal(MultipartFile file, Long animalId) {
         Optional<AnimalEntity> animalOptional = animalRepository.findById(animalId);
-        if (file.isEmpty()) {
+        if (file == null || file.isEmpty()) {
             throw new ResourceNotExistsException("Failed to store empty file");
         }
         if (animalOptional.isPresent()) {
@@ -88,7 +89,7 @@ public class ImageService {
     public Optional<SavedImageDTO> getImageByPath(Long id, Long imageId) {
         return imageRepository.findById(imageId)
                 .map(image -> {
-                    if (image.getAnimal().getId() != id) {
+                    if (!Objects.equals(image.getAnimal().getId(), id)) {
                         log.warn("This image {} is not assigned to given animal {}", image.getAnimal().getId(), id);
                         throw new ResourceNotExistsException("This image does not exist for given animal");
                     }

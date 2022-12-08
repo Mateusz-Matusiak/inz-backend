@@ -58,7 +58,8 @@ public class AnimalService {
                 .map(
                         animalEntity -> imageRepository.findByAnimalAndMainIsTrue(animalEntity)
                                 .map(image -> new AnimalOutput(animalEntity.getId(), animalEntity.getName(),
-                                        animalEntity.getAge(), animalEntity.getShelterDate(),
+                                        animalEntity.getAge(),
+                                        animalEntity.getShelterDate(),
                                         image.getFilePath(),
                                         animalEntity.getAnimalTypeEntity().getTypeName(),
                                         animalEntity.getAnimalDetailsEntity().getSex(),
@@ -81,7 +82,7 @@ public class AnimalService {
                         new AnimalDetailsOutput(
                                 animal.getId(), animal.getName(), animal.getAge(),
                                 animal.getShelterDate(),
-                                imageRepository.findAllByAnimal(animal).stream().map(ImageEntity::getFilePath).collect(Collectors.toSet()),
+                                imageRepository.findAllByAnimal(animal).stream().map(ImageEntity::getId).collect(Collectors.toSet()),
                                 animal.getAnimalTypeEntity().getTypeName(),
                                 animal.getOwner() == null ? null : animal.getOwner().getEmail(), animal.getAnimalDetailsEntity().getColor(),
                                 animal.getAnimalDetailsEntity().getCharacter(), animal.getAnimalDetailsEntity().getDescription(),
