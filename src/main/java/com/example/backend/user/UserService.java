@@ -4,10 +4,7 @@ import com.example.backend.exception.ResourceAlreadyExistsException;
 import com.example.backend.exception.ResourceNotExistsException;
 import com.example.backend.user.address.AddressEntity;
 import com.example.backend.user.address.AddressRepository;
-import com.example.backend.user.dto.RegisterUserDTO;
-import com.example.backend.user.dto.UpdateUserDTO;
-import com.example.backend.user.dto.UserMapper;
-import com.example.backend.user.dto.UserOutput;
+import com.example.backend.user.dto.*;
 import com.example.backend.user.role.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +25,6 @@ public class UserService implements UserDetailsService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final AddressRepository addressRepository;
-
     public Optional<UserOutput> addUser(RegisterUserDTO newUser) {
         return Optional.ofNullable(roleRepository.findByName("USER")
                 .map(
@@ -40,6 +36,25 @@ public class UserService implements UserDetailsService {
                                 throw new ResourceAlreadyExistsException(String.format("Email %s already exists", newUser.email()));
                             }
                         })
+                .map(userMapper::map)
+                .orElseThrow(() -> {
+                    final String message = "Role USER does not exist!!";
+                    log.error(message);
+                    throw new ResourceNotExistsException(message);
+                }));
+    }
+
+    public Optional<UserOutput> addGoogleUser(GoogleCredentialsDTO googleUser) {
+        return Optional.ofNullable(roleRepository.findByName("USER")
+                .map(
+                        roleEntity -> {
+                            if (userRepository.findByEmail(googleUser.email()).isEmpty()) {
+                                return userRepository.save(userMapper.map(googleUser));
+                            } else {
+                                throw new ResourceAlreadyExistsException(String.format("Email %s already exists", googleUser.email()));
+                            }
+                        }
+                )
                 .map(userMapper::map)
                 .orElseThrow(() -> {
                     final String message = "Role USER does not exist!!";
@@ -103,7 +118,6 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<UserEntity> user = userRepository.findByEmail(username);
-        return user.get();
+        return userRepository.findByEmail(username).orElse(null);
     }
 }

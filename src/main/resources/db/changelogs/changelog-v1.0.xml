@@ -238,5 +238,16 @@
                 baseTableName="users" baseColumnNames="address_id" constraintName="fk_users_address_id"
                 referencedTableName="address" referencedColumnNames="id"/>
     </changeSet>
+    <changeSet id="add-credentials-provider-to-users" author="mmatusiak">
+        <addColumn tableName="users">
+            <column name="provider" type="VARCHAR(16)"/>
+        </addColumn>
+        <sql>
+            UPDATE users
+            SET provider='INTERNAL'
+            WHERE provider IS NULL
+        </sql>
+        <addNotNullConstraint tableName="users" columnName="provider"/>
+    </changeSet>
 </databaseChangeLog>
 

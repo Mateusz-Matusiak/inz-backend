@@ -1,8 +1,10 @@
 package com.example.backend.user.dto;
 
+import com.example.backend.user.CredentialsProvider;
 import com.example.backend.user.UserEntity;
 import com.example.backend.user.role.RoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.List;
 public class UserMapperImpl implements UserMapper {
 
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     public UserOutput map(UserEntity user) {
@@ -29,7 +33,7 @@ public class UserMapperImpl implements UserMapper {
         return roleRepository.findByName("USER")
                 .map(
                         role -> new UserEntity("", "",
-                                user.email(), user.password(),
+                                user.email(), passwordEncoder.encode(user.password()),
                                 "", role))
                 .orElse(null);
     }
@@ -42,5 +46,19 @@ public class UserMapperImpl implements UserMapper {
                                 user.getLastName(), user.getEmail(),
                                 user.getPhoneNumber(), user.getRole().getName()))
                 .toList();
+    }
+
+    @Override
+    public UserEntity map(GoogleCredentialsDTO user) {
+        if (user == null)
+            return null;
+        String firstName = user.givenName() == null ? "" : user.givenName();
+        String lastName = user.familyName() == null ? "" : user.familyName();
+        return roleRepository.findByName("USER")
+                .map(
+                        role -> new UserEntity(firstName, lastName,
+                                user.email(), passwordEncoder.encode(""),
+                                "", CredentialsProvider.GOOGLE, role))
+                .orElse(null);
     }
 }

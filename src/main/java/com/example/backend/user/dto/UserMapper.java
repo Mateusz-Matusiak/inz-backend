@@ -12,4 +12,6 @@ public interface UserMapper {
     UserEntity map(RegisterUserDTO user);
 
     List<UserOutput> map(List<UserEntity> users);
+
+    UserEntity map(GoogleCredentialsDTO user);
 }

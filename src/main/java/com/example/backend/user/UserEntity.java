@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +32,9 @@ public class UserEntity implements UserDetails {
 
     @OneToOne
     private AddressEntity address;
-    //todo add address entity
+    @Enumerated(value = EnumType.STRING)
+    @NotNull
+    private CredentialsProvider provider;
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private RoleEntity role;
@@ -50,6 +53,21 @@ public class UserEntity implements UserDetails {
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.provider = CredentialsProvider.INTERNAL;
+    }
+
+    public UserEntity(
+            String firstName, String lastName, String email,
+            String password, String phoneNumber, CredentialsProvider provider,
+            RoleEntity role
+    ) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.provider = provider;
         this.role = role;
     }
 
