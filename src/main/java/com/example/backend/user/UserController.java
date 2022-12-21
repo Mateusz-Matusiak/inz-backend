@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,7 +30,6 @@ public class UserController {
 
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder passwordEncoder;
 
     @PostMapping
     public ResponseEntity<UserOutput> registerUser(@RequestBody @Valid RegisterUserDTO user) {
@@ -73,9 +70,9 @@ public class UserController {
 
     @PostMapping("/login/google")
     public ResponseEntity<UserOutput> loginUserWithGoogle(@RequestBody @Valid GoogleCredentialsDTO googleCredentialsDTO) {
-        UserDetails user = userService.loadUserByUsername(googleCredentialsDTO.email());
+        UserEntity user = (UserEntity) userService.loadUserByUsername(googleCredentialsDTO.email());
         if (user != null) {
-            if (userService.loadUserByUsername(googleCredentialsDTO.email()).getPassword().equals(passwordEncoder.encode(""))) {
+            if (user.getProvider() != CredentialsProvider.GOOGLE) {
                 throw new IncorrectProviderException("This user is signed up by internal provider not google!");
             }
             return ResponseEntity.ok()
