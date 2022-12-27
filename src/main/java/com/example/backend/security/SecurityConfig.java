@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .authorizeRequests(auth -> {
                     auth.antMatchers("/users/login/**", "/users").permitAll();
                     auth.antMatchers("/animals", "/animals/*/images/**").permitAll();
+                    auth.antMatchers("/users/confirm-registration**").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(

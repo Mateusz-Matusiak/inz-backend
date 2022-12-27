@@ -249,5 +249,44 @@
         </sql>
         <addNotNullConstraint tableName="users" columnName="provider"/>
     </changeSet>
+
+    <changeSet id="activation_tokens" author="mmatusiak">
+        <createTable tableName="activation_tokens">
+            <column name="token" type="VARCHAR(127)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expire_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column type="BIGINT" name="user_id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="activation_tokens" columnNames="token"/>
+        <addForeignKeyConstraint
+                baseTableName="activation_tokens" baseColumnNames="user_id"
+                constraintName="fk_activation_tokens_user"
+                referencedTableName="users" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="add_blocked_and_active_to_user_table" author="mmatusiak">
+        <addColumn tableName="users">
+            <column name="is_active" type="boolean"/>
+        </addColumn>
+        <addColumn tableName="users">
+            <column name="is_not_blocked" type="boolean"/>
+        </addColumn>
+
+        <sql>
+            UPDATE users
+            SET is_not_blocked= true
+            WHERE is_not_blocked IS NULL;
+            UPDATE users
+            SET is_active= true
+            WHERE is_active IS NULL;
+        </sql>
+        <addNotNullConstraint tableName="users" columnName="is_not_blocked"/>
+        <addNotNullConstraint tableName="users" columnName="is_active"/>
+    </changeSet>
 </databaseChangeLog>
 

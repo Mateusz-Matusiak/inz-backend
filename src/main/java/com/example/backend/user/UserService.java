@@ -2,6 +2,7 @@ package com.example.backend.user;
 
 import com.example.backend.exception.ResourceAlreadyExistsException;
 import com.example.backend.exception.ResourceNotExistsException;
+import com.example.backend.mail.activation.token.ActivationTokenRepository;
 import com.example.backend.user.address.AddressEntity;
 import com.example.backend.user.address.AddressRepository;
 import com.example.backend.user.dto.*;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +27,9 @@ public class UserService implements UserDetailsService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final AddressRepository addressRepository;
+
+    private final ActivationTokenRepository activationTokenRepository;
+
     public Optional<UserOutput> addUser(RegisterUserDTO newUser) {
         return Optional.ofNullable(roleRepository.findByName("USER")
                 .map(
@@ -119,5 +124,21 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByEmail(username).orElse(null);
+    }
+
+    @Transactional
+    public Optional<UserOutput> verifyUser(String token) {
+        return activationTokenRepository.findById(token).flatMap(userToken -> {
+            if (userToken.getExpireTime().isAfter(LocalDateTime.now())) {
+                activationTokenRepository.delete(userToken);
+                userToken.getUser().setActive(true);
+                return Optional.of(userMapper.map(userRepository.save(userToken.getUser())));
+            }
+            log.warn("Token {} is already expired", userToken);
+            return Optional.empty();
+        }).or(() -> {
+            log.warn("Token {} does not exist in database", token);
+            return Optional.empty();
+        });
     }
 }

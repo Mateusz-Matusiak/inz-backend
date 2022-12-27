@@ -43,6 +43,14 @@ public class UserEntity implements UserDetails {
     @OneToMany(mappedBy = "id")
     private List<WalkEntity> walks;
 
+    @NotNull
+    @Column(nullable = false)
+    private boolean isActive;
+
+    @NotNull
+    @Column(nullable = false)
+    private boolean isNotBlocked;
+
 
     public UserEntity(
             String firstName, String lastName, String email,
@@ -55,6 +63,8 @@ public class UserEntity implements UserDetails {
         this.phoneNumber = phoneNumber;
         this.role = role;
         this.provider = CredentialsProvider.INTERNAL;
+        this.isActive = false;
+        this.isNotBlocked = true;
     }
 
     public UserEntity(
@@ -89,7 +99,7 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return isNotBlocked;
     }
 
     @Override
@@ -99,6 +109,6 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isActive;
     }
 }
