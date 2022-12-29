@@ -1,5 +1,6 @@
 package com.example.backend.animal;
 
+import com.example.backend.animal.adoption.dto.WalkOutput;
 import com.example.backend.animal.dto.AnimalDetailsOutput;
 import com.example.backend.animal.dto.AnimalOutput;
 import com.example.backend.animal.dto.NewAnimalDTO;
@@ -120,6 +121,11 @@ public class AnimalController {
                     }
                 }).orElseThrow(() -> new ResourceNotExistsException(String.format("This animal [%d] doesn't have image", id)));
         return new ResponseEntity<>(IOUtils.toByteArray(is), headers, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}/walks")
+    public ResponseEntity<List<WalkOutput>> getIncomingWalksByAnimalId(@PathVariable Long id) {
+        return ResponseEntity.ok(animalService.getIncomingWalksById(id));
     }
 
 

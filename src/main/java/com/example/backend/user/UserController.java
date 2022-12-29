@@ -5,10 +5,7 @@ import com.example.backend.mail.RegistrationEvent;
 import com.example.backend.mail.UserToken;
 import com.example.backend.mail.activation.token.ActivationTokenService;
 import com.example.backend.security.TokenService;
-import com.example.backend.user.dto.GoogleCredentialsDTO;
-import com.example.backend.user.dto.RegisterUserDTO;
-import com.example.backend.user.dto.UpdateUserDTO;
-import com.example.backend.user.dto.UserOutput;
+import com.example.backend.user.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -22,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -58,7 +56,7 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserOutput>> fetchAllUsers() {
+    public ResponseEntity<List<UserWithAddressOutput>> fetchAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
@@ -70,9 +68,23 @@ public class UserController {
                 .orElse(ResponseEntity.internalServerError().build());
     }
 
+    @PatchMapping("/details")
+    public ResponseEntity<UserOutput> updateUser(@RequestBody UpdateUserDTO userDetails, Principal principal) {
+        return userService.partialUpdateByEmail(principal.getName(), userDetails)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.internalServerError().build());
+    }
+
+
     @GetMapping("/{id}")
-    public ResponseEntity<UserEntity> fetchUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDetailsOutput> fetchUserById(@PathVariable Long id) {
         return userService.getUserById(id).map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/details")
+    public ResponseEntity<UserDetailsOutput> fetchUserById(Principal principal) {
+        return userService.getUserDetailsByEmail(principal.getName()).map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

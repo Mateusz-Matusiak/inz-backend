@@ -1,6 +1,7 @@
 package com.example.backend.animal.adoption;
 
 import com.example.backend.animal.AnimalRepository;
+import com.example.backend.animal.adoption.dto.WalkDetailsOutput;
 import com.example.backend.exception.ResourceNotExistsException;
 import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -51,9 +52,9 @@ public class WalkService {
                         }));
     }
 
-    public List<WalkEntity> getAllWalksToday() {
-        return walkRepository.findAllByDateBetween(LocalDateTime.now().withHour(0).withMinute(0).withSecond(0),
-                LocalDateTime.now().withHour(23).withMinute(59).withSecond(59));
+    public List<WalkDetailsOutput> getAllWalks() {
+        return walkRepository.findAll().stream()
+                .map(walk -> new WalkDetailsOutput(walk.getId(), walk.getAnimal().getId(), walk.getAnimal().getName(), walk.getUser().getEmail(), walk.getDate())).toList();
     }
 
 }

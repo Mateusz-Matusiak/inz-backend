@@ -160,12 +160,15 @@
         <insert tableName="roles">
             <column name="name" value="USER"/>
         </insert>
+        <insert tableName="roles">
+            <column name="name" value="ADMIN"/>
+        </insert>
         <insert tableName="users">
             <column name="email" value="mateusz.matusiak01@gmail.com"/>
             <column name="first_name" value="Mateusz"/>
             <column name="last_name" value="Matusiak"/>
             <column name="phone_number" value="794123456"/>
-            <column name="role_id" value="1"/>
+            <column name="role_id" value="2"/>
             <!--hasło password-->
             <column name="password" value="$2a$12$QiLwXwmACrVLaN3L4DQ5peeu55AVmcF4MPewrPjUNMqQGo4EVee7W"/>
         </insert>

@@ -10,6 +10,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -37,11 +38,22 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
+        return http.cors().and().csrf(AbstractHttpConfigurer::disable)
                 .authorizeRequests(auth -> {
-                    auth.antMatchers("/users/login/**", "/users").permitAll();
-                    auth.antMatchers("/animals", "/animals/*/images/**").permitAll();
-                    auth.antMatchers("/users/confirm-registration**").permitAll();
+                    auth.antMatchers("/users/login/**", "/users/confirm-registration**").permitAll();
+                    auth.antMatchers(HttpMethod.POST, "/users").permitAll();
+                    auth.antMatchers("/animals", "/animals/*/images/**", "/animals/*/details", "/animals/*/walks").permitAll();
+                    auth.antMatchers("/v2/api-docs",
+                            "/swagger-resources",
+                            "/swagger-resources/**",
+                            "/configuration/ui",
+                            "/configuration/security",
+                            "/swagger-ui.html",
+                            "/webjars/**",
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**").permitAll();
+                    auth.antMatchers(HttpMethod.GET, "/walks").hasRole("ADMIN");
+                    auth.antMatchers(HttpMethod.GET, "/users").hasRole("ADMIN");
                     auth.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(

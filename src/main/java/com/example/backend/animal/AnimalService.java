@@ -1,5 +1,6 @@
 package com.example.backend.animal;
 
+import com.example.backend.animal.adoption.dto.WalkOutput;
 import com.example.backend.animal.details.AnimalDetailsEntity;
 import com.example.backend.animal.details.AnimalDetailsRepository;
 import com.example.backend.animal.dto.AnimalDetailsOutput;
@@ -8,11 +9,13 @@ import com.example.backend.animal.dto.NewAnimalDTO;
 import com.example.backend.animal.images.ImageEntity;
 import com.example.backend.animal.images.ImageRepository;
 import com.example.backend.animal.type.AnimalTypeRepository;
+import com.example.backend.exception.ResourceNotExistsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -88,5 +91,11 @@ public class AnimalService {
                                 animal.getAnimalDetailsEntity().getCharacter(), animal.getAnimalDetailsEntity().getDescription(),
                                 animal.getAnimalDetailsEntity().getSex(), animal.getAnimalDetailsEntity().getSize())
         );
+    }
+
+    public List<WalkOutput> getIncomingWalksById(Long id) {
+        return animalRepository.findById(id).map(animal ->
+                animal.getWalks().stream().filter(walkEntity -> LocalDateTime.now().isBefore(walkEntity.getDate())).map(walk -> new WalkOutput(walk.getId(), walk.getDate())).toList()
+        ).orElseThrow(() -> new ResourceNotExistsException("Animal does not exist"));
     }
 }

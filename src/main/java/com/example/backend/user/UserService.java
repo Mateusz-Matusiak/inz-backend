@@ -68,11 +68,15 @@ public class UserService implements UserDetailsService {
                 }));
     }
 
-    public List<UserOutput> getAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::map)
-                .toList();
+    public List<UserWithAddressOutput> getAllUsers() {
+        return userRepository.findAll().stream().map(user -> {
+            final AddressEntity address = user.getAddress();
+            if (address != null) {
+                final String addressOutput = address.getCity() + ", " + address.getStreet() + ",  " + address.getPostalCode();
+                return new UserWithAddressOutput(user.getId(), user.getEmail(), user.getFirstName() + " " + user.getLastName(), user.getPhoneNumber(), addressOutput);
+            }
+            return new UserWithAddressOutput(user.getId(), user.getEmail(), user.getFirstName() + " " + user.getLastName(), user.getPhoneNumber(), "");
+        }).toList();
     }
 
     @Transactional
@@ -110,6 +114,41 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new ResourceNotExistsException(String.format("User with given id %d does not exist", id)));
     }
 
+    @Transactional
+    public Optional<UserOutput> partialUpdateByEmail(String email, UpdateUserDTO userDetails) {
+        return userRepository.findByEmail(email)
+                .map(user -> {
+                    user.setFirstName(checkAndUpdateField(user.getFirstName(), userDetails.firstName()));
+                    user.setLastName(checkAndUpdateField(user.getLastName(), userDetails.lastName()));
+                    user.setPhoneNumber(checkAndUpdateField(user.getPhoneNumber(), userDetails.phoneNumber()));
+                    AddressEntity userAddress;
+                    if (user.getAddress() != null) {
+                        userAddress = user.getAddress();
+                        addressRepository.deleteById(userAddress.getId());
+                    } else {
+                        userAddress = new AddressEntity();
+                    }
+                    userAddress.setCity(userDetails.city());
+                    userAddress.setStreet(userDetails.streetName() + " " + userDetails.streetNumber());
+                    userAddress.setPostalCode(userDetails.postalCode());
+                    userAddress.setCountry(userDetails.country());
+                    AddressEntity saved = addressRepository.save(userAddress);
+                    user.setAddress(saved);
+                    if (userDetails.role() != null) {
+                        roleRepository.findByName(userDetails.role())
+                                .ifPresentOrElse(
+                                        user::setRole,
+                                        () -> {
+                                            log.warn("Role {} does not exist!", userDetails.role());
+                                            throw new ResourceNotExistsException("Role " + userDetails.role() + " does not exist!");
+                                        });
+                    }
+                    return userRepository.save(user);
+                })
+                .map(user -> Optional.of(userMapper.map(user)))
+                .orElseThrow(() -> new ResourceNotExistsException(String.format("User with given email %s does not exist", email)));
+    }
+
     private String checkAndUpdateField(String oldField, String newField) {
         if (newField != null && !newField.isBlank()) {
             return newField;
@@ -117,8 +156,32 @@ public class UserService implements UserDetailsService {
         return oldField;
     }
 
-    public Optional<UserEntity> getUserById(Long id) {
-        return userRepository.findById(id);
+    public Optional<UserDetailsOutput> getUserById(Long id) {
+        return userRepository.findById(id).map(user -> {
+            final AddressEntity address = user.getAddress();
+            if (address != null) {
+                String[] street = address.getStreet().split(" ", 2);
+                return new UserDetailsOutput(
+                        user.getId(), user.getEmail(), user.getFirstName() + " " + user.getLastName(),
+                        user.getPhoneNumber(), address.getCity(), street[0], Integer.parseInt(street[1]), address.getPostalCode(), address.getCountry());
+            }
+            return new UserDetailsOutput(user.getId(), user.getEmail(), user.getFirstName() + " " + user.getLastName(),
+                    user.getPhoneNumber(), null, null, null, null, null);
+        });
+    }
+
+    public Optional<UserDetailsOutput> getUserDetailsByEmail(String email) {
+        return userRepository.findByEmail(email).map(user -> {
+            final AddressEntity address = user.getAddress();
+            if (address != null) {
+                String[] street = address.getStreet().split(" ", 2);
+                return new UserDetailsOutput(
+                        user.getId(), user.getEmail(), user.getFirstName() + " " + user.getLastName(),
+                        user.getPhoneNumber(), address.getCity(), street[0], Integer.parseInt(street[1]), address.getPostalCode(), address.getCountry());
+            }
+            return new UserDetailsOutput(user.getId(), user.getEmail(), user.getFirstName() + " " + user.getLastName(),
+                    user.getPhoneNumber(), null, null, null, null, null);
+        });
     }
 
     @Override
@@ -140,5 +203,9 @@ public class UserService implements UserDetailsService {
             log.warn("Token {} does not exist in database", token);
             return Optional.empty();
         });
+    }
+
+    public Long getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email).map(UserEntity::getId).orElseThrow(() -> new UsernameNotFoundException("No user was found by this id"));
     }
 }

@@ -79,6 +79,8 @@ public class UserEntity implements UserDetails {
         this.phoneNumber = phoneNumber;
         this.provider = provider;
         this.role = role;
+        this.isActive = true;
+        this.isNotBlocked = true;
     }
 
     @Override
