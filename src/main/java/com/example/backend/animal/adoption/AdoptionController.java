@@ -3,12 +3,10 @@ package com.example.backend.animal.adoption;
 import com.example.backend.animal.adoption.dto.WalkDTO;
 import com.example.backend.animal.adoption.dto.WalkDetailsOutput;
 import com.example.backend.user.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -36,5 +34,35 @@ public class AdoptionController {
     @GetMapping("/walks")
     public ResponseEntity<List<WalkDetailsOutput>> getAllWalks() {
         return ResponseEntity.ok(walkService.getAllWalks());
+    }
+
+    @GetMapping("/users/{id}/walks")
+    public ResponseEntity<List<WalkDetailsOutput>> getAllWalksByUsedId(@PathVariable Long id) {
+        return ResponseEntity.ok(walkService.getAllWalksByUserId(id));
+    }
+
+    @GetMapping("/users/walks")
+    public ResponseEntity<List<WalkDetailsOutput>> getMyWalks(Principal principal) {
+        return ResponseEntity.ok(walkService.getAllWalksByEmail(principal.getName()));
+    }
+
+    @Operation(summary = "Delete for user for his walks")
+    @DeleteMapping("/users/walks/{id}")
+    public ResponseEntity<Void> deleteUsersWalkById(@PathVariable Long id, Principal principal) {
+        walkService.deleteUsersWalkById(id, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Delete for admin for all walks")
+    @DeleteMapping("/walks/{id}")
+    public ResponseEntity<Void> deleteWalkById(@PathVariable Long id) {
+        walkService.deleteWalkById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get walks for animal to display them")
+    @GetMapping("/animals/{id}/walks/details")
+    public ResponseEntity<List<WalkDetailsOutput>> getWalksForAnimal(@PathVariable Long id) {
+        return ResponseEntity.ok(walkService.getWalksByAnimalId(id));
     }
 }

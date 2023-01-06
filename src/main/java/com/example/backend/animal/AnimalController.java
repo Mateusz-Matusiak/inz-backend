@@ -129,4 +129,10 @@ public class AnimalController {
     }
 
 
+    @PutMapping("/{id}/details")
+    public ResponseEntity<Void> updateAnimalDetails(@RequestBody NewAnimalDTO animal, @PathVariable Long id) {
+        animalService.updateAnimalById(id, animal);
+        return ResponseEntity.noContent().build();
+    }
+
 }

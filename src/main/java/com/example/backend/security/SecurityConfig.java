@@ -40,6 +40,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.cors().and().csrf(AbstractHttpConfigurer::disable)
                 .authorizeRequests(auth -> {
+                    auth.antMatchers(HttpMethod.PUT, "/animals/*/details").hasRole("ADMIN");
+                    auth.antMatchers(HttpMethod.GET, "/walks").hasRole("ADMIN");
+                    auth.antMatchers(HttpMethod.GET, "/users").hasRole("ADMIN");
                     auth.antMatchers("/users/login/**", "/users/confirm-registration**").permitAll();
                     auth.antMatchers(HttpMethod.POST, "/users").permitAll();
                     auth.antMatchers("/animals", "/animals/*/images/**", "/animals/*/details", "/animals/*/walks").permitAll();
@@ -52,8 +55,6 @@ public class SecurityConfig {
                             "/webjars/**",
                             "/v3/api-docs/**",
                             "/swagger-ui/**").permitAll();
-                    auth.antMatchers(HttpMethod.GET, "/walks").hasRole("ADMIN");
-                    auth.antMatchers(HttpMethod.GET, "/users").hasRole("ADMIN");
                     auth.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(
