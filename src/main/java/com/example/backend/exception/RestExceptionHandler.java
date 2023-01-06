@@ -20,7 +20,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = {ResourceAlreadyExistsException.class})
+    @ExceptionHandler(value = {ResourceAlreadyExistsException.class, IncorrectProviderException.class})
     public ResponseEntity<Object> handleConflict(Exception ex, WebRequest request) {
         return handleExceptionInternal(ex,
                 new ExceptionRequestBodyDTO(Map.of("error", ex.getMessage())),

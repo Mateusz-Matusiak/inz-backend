@@ -160,12 +160,15 @@
         <insert tableName="roles">
             <column name="name" value="USER"/>
         </insert>
+        <insert tableName="roles">
+            <column name="name" value="ADMIN"/>
+        </insert>
         <insert tableName="users">
             <column name="email" value="mateusz.matusiak01@gmail.com"/>
             <column name="first_name" value="Mateusz"/>
             <column name="last_name" value="Matusiak"/>
             <column name="phone_number" value="794123456"/>
-            <column name="role_id" value="1"/>
+            <column name="role_id" value="2"/>
             <!--hasło password-->
             <column name="password" value="$2a$12$QiLwXwmACrVLaN3L4DQ5peeu55AVmcF4MPewrPjUNMqQGo4EVee7W"/>
         </insert>
@@ -208,6 +211,85 @@
         </createTable>
         <addForeignKeyConstraint baseTableName="images" baseColumnNames="animal_id" constraintName="fk_images_animal_id"
                                  referencedTableName="animals" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="develop_user" author="mmatusiak">
+        <dropNotNullConstraint tableName="users" columnName="password"/>
+
+        <createTable tableName="address">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="city" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="postal_code" type="VARCHAR(16)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addColumn tableName="users">
+            <column name="address_id" type="BIGINT"/>
+        </addColumn>
+        <addForeignKeyConstraint
+                baseTableName="users" baseColumnNames="address_id" constraintName="fk_users_address_id"
+                referencedTableName="address" referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet id="add-credentials-provider-to-users" author="mmatusiak">
+        <addColumn tableName="users">
+            <column name="provider" type="VARCHAR(16)"/>
+        </addColumn>
+        <sql>
+            UPDATE users
+            SET provider='INTERNAL'
+            WHERE provider IS NULL
+        </sql>
+        <addNotNullConstraint tableName="users" columnName="provider"/>
+    </changeSet>
+
+    <changeSet id="activation_tokens" author="mmatusiak">
+        <createTable tableName="activation_tokens">
+            <column name="token" type="VARCHAR(127)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expire_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column type="BIGINT" name="user_id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="activation_tokens" columnNames="token"/>
+        <addForeignKeyConstraint
+                baseTableName="activation_tokens" baseColumnNames="user_id"
+                constraintName="fk_activation_tokens_user"
+                referencedTableName="users" referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="add_blocked_and_active_to_user_table" author="mmatusiak">
+        <addColumn tableName="users">
+            <column name="is_active" type="boolean"/>
+        </addColumn>
+        <addColumn tableName="users">
+            <column name="is_not_blocked" type="boolean"/>
+        </addColumn>
+
+        <sql>
+            UPDATE users
+            SET is_not_blocked= true
+            WHERE is_not_blocked IS NULL;
+            UPDATE users
+            SET is_active= true
+            WHERE is_active IS NULL;
+        </sql>
+        <addNotNullConstraint tableName="users" columnName="is_not_blocked"/>
+        <addNotNullConstraint tableName="users" columnName="is_active"/>
     </changeSet>
 </databaseChangeLog>
 

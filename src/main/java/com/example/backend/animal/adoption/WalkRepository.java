@@ -7,7 +7,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface WalkRepository extends JpaRepository<WalkEntity, Long> {
-    List<WalkEntity> findAllByDateBetween(LocalDateTime startOfDay, LocalDateTime endOfDay);
 
     long countAllByAnimalAndDateBetween(AnimalEntity animal, LocalDateTime startOfDay, LocalDateTime endOfDay);
+
+    List<WalkEntity> findAllByAnimal(AnimalEntity animal);
+
+    List<WalkEntity> findAllByUserEmail(String email);
+
+    List<WalkEntity> findAllByUserIdAndDateAfter(Long id, LocalDateTime date);
 }

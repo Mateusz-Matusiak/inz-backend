@@ -1,6 +1,7 @@
 package com.example.backend.animal;
 
 import com.example.backend.animal.adoption.AdoptionSurveyEntity;
+import com.example.backend.animal.adoption.WalkEntity;
 import com.example.backend.animal.details.AnimalDetailsEntity;
 import com.example.backend.animal.type.AnimalTypeEntity;
 import com.example.backend.user.UserEntity;
@@ -36,6 +37,9 @@ public class AnimalEntity {
     @ManyToOne(targetEntity = UserEntity.class)
     @JoinColumn(name = "owner_id")
     private UserEntity owner;
+
+    @OneToMany(mappedBy = "animal", fetch = FetchType.EAGER)
+    private List<WalkEntity> walks;
 
     public AnimalEntity(String name, Integer age, LocalDate shelterDate, String imagePath, AnimalTypeEntity animalTypeEntity) {
         this.name = name;
