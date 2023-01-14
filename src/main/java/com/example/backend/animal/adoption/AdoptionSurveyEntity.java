@@ -5,6 +5,7 @@ import com.example.backend.user.UserEntity;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -19,16 +20,19 @@ public class AdoptionSurveyEntity {
     @ManyToOne(targetEntity = AnimalEntity.class)
     @JoinColumn(name = "animal_id")
     private AnimalEntity animal;
-    private boolean isAccepted;
-    private int numberOfWalks;
+    private LocalDate date;
+
+    @Column(name = "is_accepted")
+    private Boolean isAccepted;
+
+    private String declineMessage;
 
     public AdoptionSurveyEntity(UserEntity user, AnimalEntity animal) {
         this.user = user;
         this.animal = animal;
-        this.isAccepted = false;
+        this.date = LocalDate.now();
     }
 
     public AdoptionSurveyEntity() {
-
     }
 }

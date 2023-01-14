@@ -1,16 +1,18 @@
 package com.example.backend.animal.adoption;
 
-import com.example.backend.animal.adoption.dto.WalkDTO;
-import com.example.backend.animal.adoption.dto.WalkDetailsOutput;
+import com.example.backend.animal.adoption.dto.*;
 import com.example.backend.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
 
 @RestController
@@ -19,6 +21,7 @@ public class AdoptionController {
 
     private final WalkService walkService;
     private final UserService userService;
+    private final AdoptionService adoptionService;
 
     @PostMapping("/walks")
     public ResponseEntity<WalkDTO> addWalk(Principal principal, @RequestBody WalkDTO walk) {
@@ -64,5 +67,32 @@ public class AdoptionController {
     @GetMapping("/animals/{id}/walks/details")
     public ResponseEntity<List<WalkDetailsOutput>> getWalksForAnimal(@PathVariable Long id) {
         return ResponseEntity.ok(walkService.getWalksByAnimalId(id));
+    }
+
+    @Operation(summary = "Make adoption survey to be accepted or not by ADMIN")
+    @PostMapping("/adoption-surveys")
+    public ResponseEntity<AdoptionSurveyDTO> createAdoptionSurvey(@RequestBody @Valid NewAdoptionSurveyDTO newAdoptionSurvey, Principal principal) {
+        return adoptionService.createAdoptionSurvey(principal.getName(), newAdoptionSurvey.animalId())
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(BAD_REQUEST));
+    }
+
+    @Operation(summary = "Get all adoption surveys that are not decided yet")
+    @GetMapping("/adoption-surveys/pending")
+    public ResponseEntity<List<AdoptionSurveyDTO>> getAllAdoptionSurveys() {
+        return ResponseEntity.ok(adoptionService.fetchPendingAdoptionSurveys());
+    }
+
+    @Operation(summary = "Get logged in user adoption surveys")
+    @GetMapping("/adoption-surveys")
+    public ResponseEntity<List<AdoptionSurveyDTO>> getMyAdoptionSurveys(Principal principal) {
+        return ResponseEntity.ok(adoptionService.fetchAdoptionSurveysByUserEmail(principal.getName()));
+    }
+
+    @Operation(summary = "Make up decision whether accept or not")
+    @PostMapping("/adoption-surveys/decision")
+    public ResponseEntity<Void> acceptAdoptionSurvey(@RequestBody AdoptionSurveyDecisionDTO decision) {
+        adoptionService.makeUpDecision(decision.id(), decision.decision(), decision.message());
+        return ResponseEntity.noContent().build();
     }
 }

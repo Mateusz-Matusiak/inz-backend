@@ -109,7 +109,7 @@
             <column type="BIGINT" name="animal_id">
                 <constraints nullable="false"/>
             </column>
-            <column type="int" name="number_of_walks"/>
+            <column type="date" name="date"/>
             <column type="boolean" name="is_accepted"/>
         </createTable>
         <createTable tableName="walks">
@@ -290,6 +290,12 @@
         </sql>
         <addNotNullConstraint tableName="users" columnName="is_not_blocked"/>
         <addNotNullConstraint tableName="users" columnName="is_active"/>
+    </changeSet>
+
+    <changeSet id="add-decline-message-to-adoption-survey" author="mmatusiak">
+        <addColumn tableName="adoption_surveys">
+            <column name="decline_message" type="VARCHAR(512)"/>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>
 

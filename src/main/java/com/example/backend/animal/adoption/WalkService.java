@@ -20,7 +20,6 @@ import java.util.Optional;
 public class WalkService {
 
     private final WalkRepository walkRepository;
-    private final AdoptionSurveyRepository surveyRepository;
     private final UserRepository userRepository;
     private final AnimalRepository animalRepository;
 
@@ -31,7 +30,6 @@ public class WalkService {
                     2) {
                 return null;
             }
-            surveyRepository.save(new AdoptionSurveyEntity(user, animal));
             return walkRepository.save(new WalkEntity(user, animal, date));
         }).orElseThrow(() -> {
             final String message = String.format("Animal with id %d does not exist", animalId);
