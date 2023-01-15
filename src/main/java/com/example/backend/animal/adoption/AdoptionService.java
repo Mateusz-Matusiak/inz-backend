@@ -29,14 +29,14 @@ public class AdoptionService {
 
     @Transactional
     public Optional<AdoptionSurveyDTO> createAdoptionSurvey(String email, Long animalId) {
-        final Optional<AnimalEntity> animalOptional = animalRepository.findById(animalId);
+        final Optional<AnimalEntity> animalOptional = animalRepository.findByIdAndOwnerIsNull(animalId);
         if (animalOptional.isEmpty())
-            throw new ResourceNotExistsException("Animal with given id does not exist");
+            throw new ResourceNotExistsException("Animal with given id does not exist or has owner");
 
         final AnimalEntity animalEntity = animalOptional.get();
 
         return userRepository.findByEmail(email).flatMap(user -> {
-            if (walkRepository.countByUserAndAnimalAndDateAfter(user, animalEntity, LocalDateTime.now().minusMonths(WALKS_PERIOD_COUNT)) < MIN_NUMBER_OF_WALKS_IN_PERIOD) {
+            if (walkRepository.countByUserAndAnimalAndDateBetween(user, animalEntity, LocalDateTime.now().minusMonths(WALKS_PERIOD_COUNT), LocalDateTime.now()) < MIN_NUMBER_OF_WALKS_IN_PERIOD) {
                 return Optional.empty();
             }
             final AdoptionSurveyEntity createdSurvey = adoptionRepository.save(new AdoptionSurveyEntity(user, animalEntity));
