@@ -45,7 +45,7 @@ public class SecurityConfig {
                     auth.antMatchers(HttpMethod.GET, "/users").hasRole("ADMIN");
                     auth.antMatchers("/users/login/**", "/users/confirm-registration**").permitAll();
                     auth.antMatchers(HttpMethod.POST, "/users").permitAll();
-                    auth.antMatchers("/animals", "/animals/*/images/**", "/animals/*/details", "/animals/*/walks").permitAll();
+                    auth.antMatchers("/animals/available", "/animals", "/animals/*/images/**", "/animals/*/details", "/animals/*/walks").permitAll();
                     auth.antMatchers("/v2/api-docs",
                             "/swagger-resources",
                             "/swagger-resources/**",

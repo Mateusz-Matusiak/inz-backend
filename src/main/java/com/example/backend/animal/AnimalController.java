@@ -50,6 +50,11 @@ public class AnimalController {
         return ResponseEntity.ok(animalService.getAllAnimals());
     }
 
+    @GetMapping("/available")
+    public ResponseEntity<List<AnimalOutput>> getAllAvailableAnimals() {
+        return ResponseEntity.ok(animalService.getAllAnimalsAvailableToAdopt());
+    }
+
     @GetMapping("/types")
     public ResponseEntity<List<AnimalTypeEntity>> getAllAnimalTypes() {
         return ResponseEntity.ok(animalTypeService.getAllAnimalTypes());

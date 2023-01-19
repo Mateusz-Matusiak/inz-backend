@@ -80,6 +80,28 @@ public class AnimalService {
                 .toList();
     }
 
+    public List<AnimalOutput> getAllAnimalsAvailableToAdopt() {
+        return animalRepository.findAllByOwnerIsNull().stream()
+                .map(
+                        animalEntity -> imageRepository.findByAnimalAndMainIsTrue(animalEntity)
+                                .map(image -> new AnimalOutput(animalEntity.getId(), animalEntity.getName(),
+                                        animalEntity.getAge(),
+                                        animalEntity.getShelterDate(),
+                                        image.getFilePath(),
+                                        animalEntity.getAnimalTypeEntity().getTypeName(),
+                                        animalEntity.getAnimalDetailsEntity().getSex(),
+                                        animalEntity.getAnimalDetailsEntity().getSize())
+                                )
+                                .orElse(new AnimalOutput(animalEntity.getId(), animalEntity.getName(),
+                                        animalEntity.getAge(), animalEntity.getShelterDate(),
+                                        null,
+                                        animalEntity.getAnimalTypeEntity().getTypeName(),
+                                        animalEntity.getAnimalDetailsEntity().getSex(),
+                                        animalEntity.getAnimalDetailsEntity().getSize()))
+                )
+                .toList();
+    }
+
     public Optional<AnimalDetailsOutput> getAnimalDetailsById(Long id) {
 
         return animalRepository.findById(id).map(

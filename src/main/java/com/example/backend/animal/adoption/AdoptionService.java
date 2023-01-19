@@ -3,6 +3,7 @@ package com.example.backend.animal.adoption;
 import com.example.backend.animal.AnimalEntity;
 import com.example.backend.animal.AnimalRepository;
 import com.example.backend.animal.adoption.dto.AdoptionSurveyDTO;
+import com.example.backend.exception.ResourceAlreadyExistsException;
 import com.example.backend.exception.ResourceNotExistsException;
 import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,9 @@ public class AdoptionService {
         return userRepository.findByEmail(email).flatMap(user -> {
             if (walkRepository.countByUserAndAnimalAndDateBetween(user, animalEntity, LocalDateTime.now().minusMonths(WALKS_PERIOD_COUNT), LocalDateTime.now()) < MIN_NUMBER_OF_WALKS_IN_PERIOD) {
                 return Optional.empty();
+            }
+            if (adoptionRepository.existsAdoptionSurveyEntityByAnimalAndUser(animalEntity, user)) {
+                throw new ResourceAlreadyExistsException("You already have created adoption survey for this animal");
             }
             final AdoptionSurveyEntity createdSurvey = adoptionRepository.save(new AdoptionSurveyEntity(user, animalEntity));
             return Optional.of(new AdoptionSurveyDTO(createdSurvey.getId(), createdSurvey.getAnimal().getId(),

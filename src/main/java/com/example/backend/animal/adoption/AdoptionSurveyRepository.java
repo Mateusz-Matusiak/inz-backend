@@ -1,5 +1,6 @@
 package com.example.backend.animal.adoption;
 
+import com.example.backend.animal.AnimalEntity;
 import com.example.backend.user.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,6 @@ public interface AdoptionSurveyRepository extends JpaRepository<AdoptionSurveyEn
     List<AdoptionSurveyEntity> findAllByIsAcceptedIsNull();
 
     List<AdoptionSurveyEntity> findAllByUser(UserEntity user);
+
+    boolean existsAdoptionSurveyEntityByAnimalAndUser(AnimalEntity animal, UserEntity user);
 }
