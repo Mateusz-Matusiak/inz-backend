@@ -3,6 +3,7 @@ package com.example.backend.animal.adoption;
 import com.example.backend.animal.AnimalEntity;
 import com.example.backend.animal.AnimalRepository;
 import com.example.backend.animal.adoption.dto.AdoptionSurveyDTO;
+import com.example.backend.animal.adoption.dto.AdoptionSurveyPendingDTO;
 import com.example.backend.exception.ResourceAlreadyExistsException;
 import com.example.backend.exception.ResourceNotExistsException;
 import com.example.backend.user.UserRepository;
@@ -40,7 +41,7 @@ public class AdoptionService {
             if (walkRepository.countByUserAndAnimalAndDateBetween(user, animalEntity, LocalDateTime.now().minusMonths(WALKS_PERIOD_COUNT), LocalDateTime.now()) < MIN_NUMBER_OF_WALKS_IN_PERIOD) {
                 return Optional.empty();
             }
-            if (adoptionRepository.existsAdoptionSurveyEntityByAnimalAndUser(animalEntity, user)) {
+            if (adoptionRepository.existsAdoptionSurveyEntityByAnimalAndUserAndIsAcceptedIsNull(animalEntity, user)) {
                 throw new ResourceAlreadyExistsException("You already have created adoption survey for this animal");
             }
             final AdoptionSurveyEntity createdSurvey = adoptionRepository.save(new AdoptionSurveyEntity(user, animalEntity));
@@ -49,12 +50,16 @@ public class AdoptionService {
         });
     }
 
-    public List<AdoptionSurveyDTO> fetchPendingAdoptionSurveys() {
+    public List<AdoptionSurveyPendingDTO> fetchPendingAdoptionSurveys() {
         return adoptionRepository.findAllByIsAcceptedIsNull().stream()
-                .map(adoptionSurveyEntity -> new AdoptionSurveyDTO(
-                        adoptionSurveyEntity.getId(), adoptionSurveyEntity.getAnimal().getId(),
-                        adoptionSurveyEntity.getUser().getId(), adoptionSurveyEntity.getAnimal().getName(),
-                        adoptionSurveyEntity.getDate(), adoptionSurveyEntity.getIsAccepted(), adoptionSurveyEntity.getDeclineMessage())).toList();
+                .map(adoptionSurveyEntity -> {
+                    final List<WalkEntity> allWalks = walkRepository.findAllByAnimal(adoptionSurveyEntity.getAnimal());
+                    final long count = allWalks.stream().filter(walkEntity -> walkEntity.getUser().equals(adoptionSurveyEntity.getUser())).count();
+                    return new AdoptionSurveyPendingDTO(
+                            adoptionSurveyEntity.getId(), adoptionSurveyEntity.getAnimal().getId(),
+                            adoptionSurveyEntity.getUser().getId(), adoptionSurveyEntity.getAnimal().getName(),
+                            adoptionSurveyEntity.getDate(), adoptionSurveyEntity.getUser().getEmail(), count);
+                }).toList();
     }
 
     public List<AdoptionSurveyDTO> fetchAdoptionSurveysByUserEmail(String email) {
@@ -75,8 +80,14 @@ public class AdoptionService {
                         adoptionSurveyEntity -> {
                             if (!isAccepted)
                                 adoptionSurveyEntity.setDeclineMessage(message);
-                            else
+                            else {
                                 adoptionSurveyEntity.getAnimal().setOwner(adoptionSurveyEntity.getUser());
+                                adoptionRepository.findAllByAnimal(adoptionSurveyEntity.getAnimal())
+                                        .forEach(adoptionSurveyEntity1 -> {
+                                            adoptionSurveyEntity1.setIsAccepted(false);
+                                            adoptionSurveyEntity1.setDeclineMessage("Animal is already adopted");
+                                        });
+                            }
                             adoptionSurveyEntity.setIsAccepted(isAccepted);
                         },
                         () -> {

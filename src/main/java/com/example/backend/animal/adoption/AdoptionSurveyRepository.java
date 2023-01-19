@@ -12,5 +12,7 @@ public interface AdoptionSurveyRepository extends JpaRepository<AdoptionSurveyEn
 
     List<AdoptionSurveyEntity> findAllByUser(UserEntity user);
 
-    boolean existsAdoptionSurveyEntityByAnimalAndUser(AnimalEntity animal, UserEntity user);
+    boolean existsAdoptionSurveyEntityByAnimalAndUserAndIsAcceptedIsNull(AnimalEntity animal, UserEntity user);
+
+    List<AdoptionSurveyEntity> findAllByAnimal(AnimalEntity animal);
 }

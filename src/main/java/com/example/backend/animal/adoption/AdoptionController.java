@@ -79,7 +79,7 @@ public class AdoptionController {
 
     @Operation(summary = "Get all adoption surveys that are not decided yet")
     @GetMapping("/adoption-surveys/pending")
-    public ResponseEntity<List<AdoptionSurveyDTO>> getAllAdoptionSurveys() {
+    public ResponseEntity<List<AdoptionSurveyPendingDTO>> getAllAdoptionSurveys() {
         return ResponseEntity.ok(adoptionService.fetchPendingAdoptionSurveys());
     }
 
