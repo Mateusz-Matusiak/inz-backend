@@ -9,7 +9,9 @@ import com.example.backend.exception.ResourceNotExistsException;
 import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -93,5 +95,16 @@ public class AdoptionService {
                         () -> {
                             throw new ResourceNotExistsException("Adoption survey with given id does not exist");
                         });
+    }
+
+    public void deleteSurveyById(Long id, String email) {
+        adoptionRepository.findById(id).ifPresentOrElse(survey -> {
+            if (survey.getUser().getEmail().equals(email)) {
+                adoptionRepository.delete(survey);
+            } else
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }, () -> {
+            throw new ResourceNotExistsException("Survey with given id does not exist");
+        });
     }
 }

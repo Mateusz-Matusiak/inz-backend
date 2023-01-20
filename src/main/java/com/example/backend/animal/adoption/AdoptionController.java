@@ -95,4 +95,11 @@ public class AdoptionController {
         adoptionService.makeUpDecision(decision.id(), decision.decision(), decision.message());
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Delete survey by id")
+    @DeleteMapping("/adoption-surveys/{id}")
+    public ResponseEntity<Void> deleteSurvey(@PathVariable Long id, Principal principal) {
+        adoptionService.deleteSurveyById(id, principal.getName());
+        return ResponseEntity.noContent().build();
+    }
 }
