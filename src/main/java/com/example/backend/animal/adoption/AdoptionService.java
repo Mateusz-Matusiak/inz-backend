@@ -4,11 +4,13 @@ import com.example.backend.animal.AnimalEntity;
 import com.example.backend.animal.AnimalRepository;
 import com.example.backend.animal.adoption.dto.AdoptionSurveyDTO;
 import com.example.backend.animal.adoption.dto.AdoptionSurveyPendingDTO;
+import com.example.backend.animal.adoption.events.SurveyDecidedEvent;
 import com.example.backend.exception.ResourceAlreadyExistsException;
 import com.example.backend.exception.ResourceNotExistsException;
 import com.example.backend.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -29,6 +31,7 @@ public class AdoptionService {
     private final WalkRepository walkRepository;
     private final UserRepository userRepository;
     private final AnimalRepository animalRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
 
     @Transactional
@@ -91,6 +94,7 @@ public class AdoptionService {
                                         });
                             }
                             adoptionSurveyEntity.setIsAccepted(isAccepted);
+                            eventPublisher.publishEvent(new SurveyDecidedEvent(this, adoptionSurveyEntity.getUser().getEmail(), isAccepted));
                         },
                         () -> {
                             throw new ResourceNotExistsException("Adoption survey with given id does not exist");

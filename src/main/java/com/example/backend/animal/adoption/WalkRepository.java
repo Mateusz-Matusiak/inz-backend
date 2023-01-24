@@ -18,4 +18,6 @@ public interface WalkRepository extends JpaRepository<WalkEntity, Long> {
     List<WalkEntity> findAllByUserIdAndDateAfter(Long id, LocalDateTime date);
 
     int countByUserAndAnimalAndDateBetween(UserEntity user, AnimalEntity animal, LocalDateTime twoMonthsAgo, LocalDateTime today);
+
+    List<WalkEntity> findAllByDateBetween(LocalDateTime now, LocalDateTime tomorrow);
 }
