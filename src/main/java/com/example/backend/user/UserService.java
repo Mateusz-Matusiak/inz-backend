@@ -124,7 +124,6 @@ public class UserService implements UserDetailsService {
                     AddressEntity userAddress;
                     if (user.getAddress() != null) {
                         userAddress = user.getAddress();
-                        addressRepository.deleteById(userAddress.getId());
                     } else {
                         userAddress = new AddressEntity();
                     }

@@ -90,10 +90,15 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> loginUser(@RequestBody @Valid RegisterUserDTO loginRequestDTO) {
-        final Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
-        return ResponseEntity.ok()
-                .header(AUTHORIZATION, "Bearer " + tokenService.generateToken(authentication))
+        final Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok().header(AUTHORIZATION, "Bearer " + tokenService.generateToken(authentication))
                 .build();
     }
 
