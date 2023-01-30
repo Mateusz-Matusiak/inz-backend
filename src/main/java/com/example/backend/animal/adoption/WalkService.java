@@ -54,7 +54,7 @@ public class WalkService {
     }
 
     public List<WalkDetailsOutput> getAllWalksByUserId(Long id) {
-        return walkRepository.findAllByUserIdAndDateAfter(id, LocalDateTime.now()).stream().map(
+        return walkRepository.findAllByUserId(id).stream().map(
                 walkEntity -> new WalkDetailsOutput(walkEntity.getId(), walkEntity.getAnimal().getId(), walkEntity.getAnimal().getName(), walkEntity.getUser().getEmail(),
                         walkEntity.getDate())).toList();
     }
