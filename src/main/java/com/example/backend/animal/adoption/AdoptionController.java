@@ -12,19 +12,23 @@ import javax.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.I_AM_A_TEAPOT;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
 public class AdoptionController {
 
+    private static final int OPENING_HOUR = 8;
+    private static final int CLOSING_HOUR = 20;
     private final WalkService walkService;
     private final UserService userService;
     private final AdoptionService adoptionService;
 
     @PostMapping("/walks")
-    public ResponseEntity<WalkDTO> addWalk(Principal principal, @RequestBody WalkDTO walk) {
+    public ResponseEntity<WalkDTO> addWalk(Principal principal, @RequestBody @Valid WalkDTO walk) {
+        if (walk.date().getHour() > CLOSING_HOUR || walk.date().getHour() < OPENING_HOUR) {
+            return ResponseEntity.status(CONFLICT).build();
+        }
         final Long userId = userService.getUserIdByEmail(principal.getName());
         return walkService.reserveWalkWithDog(userId, walk.animalId(), walk.date())
                 .map(walkEntity -> ResponseEntity.ok(
