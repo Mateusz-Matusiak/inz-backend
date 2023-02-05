@@ -13,6 +13,7 @@ import com.example.backend.animal.type.AnimalTypeRepository;
 import com.example.backend.exception.ResourceNotExistsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -59,7 +60,7 @@ public class AnimalService {
     }
 
     public List<AnimalOutput> getAllAnimals() {
-        return animalRepository.findAll().stream()
+        return animalRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).stream()
                 .map(
                         animalEntity -> imageRepository.findByAnimalAndMainIsTrue(animalEntity)
                                 .map(image -> new AnimalOutput(animalEntity.getId(), animalEntity.getName(),

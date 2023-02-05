@@ -58,7 +58,7 @@ public class AdoptionService {
     public List<AdoptionSurveyPendingDTO> fetchPendingAdoptionSurveys() {
         return adoptionRepository.findAllByIsAcceptedIsNull().stream()
                 .map(adoptionSurveyEntity -> {
-                    final List<WalkEntity> allWalks = walkRepository.findAllByAnimal(adoptionSurveyEntity.getAnimal());
+                    final List<WalkEntity> allWalks = walkRepository.findAllByAnimalAndDateBefore(adoptionSurveyEntity.getAnimal(), LocalDateTime.now());
                     final long count = allWalks.stream().filter(walkEntity -> walkEntity.getUser().equals(adoptionSurveyEntity.getUser())).count();
                     return new AdoptionSurveyPendingDTO(
                             adoptionSurveyEntity.getId(), adoptionSurveyEntity.getAnimal().getId(),
