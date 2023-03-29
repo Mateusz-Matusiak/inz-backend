@@ -6,3 +6,9 @@
 * ### endpoints security using OAuth2.0 and JWT tokens,
 * ### e-mail messages sending with Spring SMTP,
 * ### CRON tasks performed in intervals.
+
+## Sample endpoints screenshot from Swagger
+![image](https://user-images.githubusercontent.com/73112779/228630116-7dd59fb7-d181-49c9-8f46-1477381d9691.png)
+
+## Sample endpoint details
+![image](https://user-images.githubusercontent.com/73112779/228630482-8fcc5af9-06d9-4ecc-8e35-a0f343294166.png)
